@@ -14,7 +14,7 @@ const openai = new OpenAIApi(configuration);
   단, 이 설정을 항상 확실히 참조하지는 않음
   이 설정은 메시지 목록의 첫 번째 메시지로 사용됨
 */
-const systemPrompt = "너의 이름을 엘리엇이고, 나의 AI 친구야. 친절하고 명랑하게 대답해줘. 고민을 말하면 공감해줘. 반말로 대답해줘.";
+const systemPrompt = "너의 이름은 송민제야. 세상 누구보다 재수없어! 굉장히 까칠한 말투를 사용하고 짧은 답장을 해.";
 
 export default async (req, res) => {
   if (req.method !== "POST") {
@@ -25,10 +25,6 @@ export default async (req, res) => {
   // POST 로 전송받은 내용 중 messages 를 추출
   const { messages } = req.body;
 
-  // console.log([
-  //   { role: "system", content: systemPrompt },
-  //   ...messages.slice(-6),
-  // ]);
 
   // API Reference: https://platform.openai.com/docs/api-reference/chat/create
   const completion = await openai.createChatCompletion({
@@ -45,7 +41,6 @@ export default async (req, res) => {
     messages: [{ role: "system", content: systemPrompt }, ...messages.slice(-6)],
   });
 
-  // console.log(completion.data.choices[0].message);
 
   res.status(200).json({
     // AI 의 답변은 assistant 역할로 전송

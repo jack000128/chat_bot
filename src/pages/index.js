@@ -67,7 +67,6 @@ export default function Home() {
       return;
     }
 
-    // console.log(result);
 
     // 로딩 상태를 해제하고, 메시지 목록에 응답을 추가
     setLoading(false);
@@ -80,7 +79,7 @@ export default function Home() {
     setMessages([
       {
         role: "assistant",
-        content: "안녕? 나는 엘리엇이야. 오늘은 무슨 일이 있었니?",
+        content: "안녕 나는 민제야. 원하는 건 모든 말해",
       },
     ]);
   };
@@ -121,7 +120,10 @@ export default function Home() {
               loading: 메시지 전송 중인지 여부
               onSendMessage: 메시지 전송 함수
             */}
-            <Chat messages={messages} loading={loading} onSendMessage={handleSend} />
+            <Chat
+              messages={messages}
+              loading={loading}
+              onSendMessage={handleSend} />
             {/* 메시지 목록의 끝으로 스크롤하기 위해 참조하는 엘리먼트 */}
             <div ref={messagesEndRef} />
           </div>
