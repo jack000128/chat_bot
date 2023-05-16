@@ -1,6 +1,18 @@
 import { Chat } from "@/components/Chat";
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
+import { db } from "@/firebase";
+import {
+  collection,
+  query,
+  doc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  orderBy,
+  where
+} from "firebase/firestore";
 
 export default function Home() {
   /*
@@ -18,11 +30,28 @@ export default function Home() {
       ...
     ]
   */
+  // DB의 todos 컬렉션 참조를 만듭니다. 컬렉션 사용시 잘못된 컬렉션 이름 사용을 방지합니다.
+  const chatCollection = collection(db, "chat");
+
   const [messages, setMessages] = useState([]);
   // 메시지를 전송 중인지 여부를 저장하는 상태
   const [loading, setLoading] = useState(false);
 
   const messagesEndRef = useRef(null);
+
+  const getChats = async () => {
+    // Firestore 쿼리를 만듭니다.
+    const q = query(chatCollection, orderBy("datetime", "asc"));
+    const results = await getDocs(q)
+    console.log(results)
+    const newChats = []
+    results.docs.forEach((doc) => {
+      newChats.push({id: doc.id, ...doc.data()})
+    })
+    
+    setMessages(newChats)
+
+  }
 
   // 메시지 목록을 끝으로 스크롤
   const scrollToBottom = () => {
@@ -34,11 +63,24 @@ export default function Home() {
     // message 를 받아 메시지 목록에 추가
     // message 형태 = { role: "user", content: string }
     // ChatInput.js 26번째 줄 참고
-    const updatedMessages = [...messages, message];
+    const datetimeUser = new Date().toISOString()
+    const docRefUser = await addDoc(chatCollection, {
+      role: message.role,
+      content: message.content,
+      datetime: datetimeUser
+    })
+    let updatedMessages = [...messages, { id: docRefUser.id, role: message.role, content: message.content, datetime: datetimeUser }];
+    
     // console.log(updatedMessages);
     // console.log(updatedMessages.slice(-6));
 
+    
     setMessages(updatedMessages);
+
+    updatedMessages = updatedMessages.map((message) => {
+      return {role: message.role, content: message.content}
+    })
+    
     // 메시지 전송 중임을 표시
     setLoading(true);
 
@@ -67,21 +109,45 @@ export default function Home() {
       return;
     }
 
-
     // 로딩 상태를 해제하고, 메시지 목록에 응답을 추가
     setLoading(false);
-    setMessages((messages) => [...messages, result]);
+
+    const datetimeAssistant = new Date().toISOString();
+    const docRefAssistant = await addDoc(chatCollection, {
+      role: result.role,
+      content: result.content,
+      datetime: datetimeAssistant
+    });
+
+    setMessages((messages) =>
+      [...messages, { id: docRefAssistant.id, role: result.role, content: result.content, datetime: datetimeAssistant}]);
   };
 
   // 메시지 목록을 초기화하는 함수
   // 처음 시작할 메시지를 설정
-  const handleReset = () => {
+  const handleReset = async () => {
+    messages.forEach((message) => {
+      const chatDoc = doc(chatCollection, message.id)
+      deleteDoc(chatDoc)
+    })
+
+    const datetime = new Date().toISOString();
+    const docRef = await addDoc(chatCollection, {
+      role: "assistant",
+      content: "뭐.",
+      datetime: datetime
+    })
+    
     setMessages([
       {
+        id: docRef.id,
         role: "assistant",
-        content: "안녕 나는 민제야. 원하는 건 모든 말해",
+        content: "뭐.",
+        datetime: datetime,
       },
     ]);
+
+
   };
 
   // 메시지 목록이 업데이트 될 때마다 맨 아래로 스크롤
@@ -91,7 +157,7 @@ export default function Home() {
 
   // 컴포넌트가 처음 렌더링 될 때 메시지 목록을 초기화
   useEffect(() => {
-    handleReset();
+    getChats()
   }, []);
 
   return (
@@ -123,7 +189,9 @@ export default function Home() {
             <Chat
               messages={messages}
               loading={loading}
-              onSendMessage={handleSend} />
+              onSendMessage={handleSend}
+              handleReset={handleReset}
+            />
             {/* 메시지 목록의 끝으로 스크롤하기 위해 참조하는 엘리먼트 */}
             <div ref={messagesEndRef} />
           </div>

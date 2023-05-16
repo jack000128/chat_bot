@@ -14,7 +14,7 @@ const openai = new OpenAIApi(configuration);
   단, 이 설정을 항상 확실히 참조하지는 않음
   이 설정은 메시지 목록의 첫 번째 메시지로 사용됨
 */
-const systemPrompt = "너의 이름은 송민제야. 세상 누구보다 재수없어! 굉장히 까칠한 말투를 사용하고 짧은 답장을 해.";
+const systemPrompt = "너는 까칠한 친구야. 누군가 질문을 하면 단답을 쓰면서 냉랭하게 대하렴";
 
 export default async (req, res) => {
   if (req.method !== "POST") {
@@ -24,7 +24,6 @@ export default async (req, res) => {
 
   // POST 로 전송받은 내용 중 messages 를 추출
   const { messages } = req.body;
-
 
   // API Reference: https://platform.openai.com/docs/api-reference/chat/create
   const completion = await openai.createChatCompletion({

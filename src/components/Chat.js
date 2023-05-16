@@ -3,7 +3,7 @@ import { ChatInput } from "./ChatInput";
 import { ChatLoader } from "./ChatLoader";
 import { ChatBubble } from "./ChatBubble";
 
-export const Chat = ({ messages, loading, onSendMessage }) => {
+export const Chat = ({ messages, loading, onSendMessage, handleReset }) => {
   return (
     <>
       <div className="flex flex-col rounded-lg px-2 sm:p-4 sm:border border-neutral-300">
@@ -25,6 +25,8 @@ export const Chat = ({ messages, loading, onSendMessage }) => {
           {/* 채팅 입력창을 표시, 전송 액션을 실행하는 onSend 함수를 넘겨준다 */}
           <ChatInput onSendMessage={onSendMessage} />
         </div>
+
+        <button onClick={handleReset}>초기화</button>
       </div>
     </>
   );
