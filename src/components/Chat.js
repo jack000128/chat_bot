@@ -26,7 +26,9 @@ export const Chat = ({ messages, loading, onSendMessage, handleReset }) => {
           <ChatInput onSendMessage={onSendMessage} />
         </div>
 
-        <button onClick={handleReset}>초기화</button>
+        <button className="bg-blue-500 text-white rounded-2xl px-3 py-2"
+          onClick={handleReset}>초기화
+        </button>
       </div>
     </>
   );
